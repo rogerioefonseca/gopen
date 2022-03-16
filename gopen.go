@@ -32,10 +32,6 @@ func openbrowser(url string) {
 	}
 }
 
-func dump(expression ...interface{}) {
-	fmt.Println(fmt.Sprintf("%#v", expression))
-}
-
 func mountRepoUrl(remote string) (string, error) {
 	repo := strings.Split(remote, ":")
 	gitRemoteEndpoint := strings.Split(string(repo[0]), "@")
