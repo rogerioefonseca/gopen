@@ -1,0 +1,20 @@
+name: Gopen 
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build binaries
+        run: |
+          make artifact
+      - name: Release with Notes
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
