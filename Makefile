@@ -1,5 +1,5 @@
 GO_BUILD ?= go build
-RM		 := rm -rf
+RM.      := rm -rf
 
 .PHONY: binaries clean install
 
