@@ -63,7 +63,7 @@ func mountRepoUrl(remote string) (string, error) {
 	return "https://" + hostname + "/" + repo[1], nil
 }
 
-func main() {
+func getGitRemoteOrigin() []byte {
 	out, err := exec.Command("git", "remote", "get-url", "origin").CombinedOutput()
 
 	if err != nil {
@@ -71,12 +71,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	if strings.Contains(string(out), "https") {
-		openbrowser(string(out))
+	return out
+}
+
+func main() {
+	cmdOutput := getGitRemoteOrigin()
+	if strings.Contains(string(cmdOutput), "https") {
+		openbrowser(string(cmdOutput))
 		os.Exit(0)
 	}
 
-	repositoryUrl, err := mountRepoUrl(string(out))
+	repositoryUrl, err := mountRepoUrl(string(cmdOutput))
 
 	if err != nil {
 		log.Fatalf("%s", "Could not retrieve the repositoryUrl correctly")
