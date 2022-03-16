@@ -41,9 +41,7 @@ func mountRepoUrl(remote string) (string, error) {
 	gitRemoteEndpoint := strings.Split(string(repo[0]), "@")
 	gitRemoteUrl := strings.Split(gitRemoteEndpoint[1], " ")
 	ssh_host := strings.Split(gitRemoteEndpoint[1], " ")
-	dump(gitRemoteEndpoint)
-	dump(gitRemoteUrl)
-	dump(ssh_host)
+
 	f, err := os.Open(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
 	if err != nil {
 		log.Fatal(err)
@@ -83,7 +81,6 @@ func main() {
 	}
 
 	repositoryUrl, err := mountRepoUrl(string(out))
-	fmt.Printf("%s", repositoryUrl)
 
 	if err != nil {
 		log.Fatalf("%s", "Could not retrieve the repositoryUrl correctly")
