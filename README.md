@@ -28,3 +28,6 @@ Host gitlab-XYZ
  HostName gitlab.internal.xyz.com
  IdentityFile ~/.ssh/id_rsa_gitlab_internal
 ```
+
+## Why I wrote this
+Well, as I do work with different github, gitlab and bitbucket projects configured with `ssh_config`, for me is very usefull, so when I'm pushing a branch to create a MR/PR(and usually I use `lazygit`) and then I want to open the remote to conclude the MR/PR creation process, I do not need anymore to type directly in the browser but instead I can just `gopen`.
