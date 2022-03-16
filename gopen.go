@@ -60,7 +60,9 @@ func mountRepoUrl(remote string) (string, error) {
 		hostname = gitRemoteUrl[0]
 	}
 
-	return "https://" + hostname + "/" + repo[1], nil
+	url := strings.TrimSuffix("https://"+hostname+"/"+repo[1], "\n")
+
+	return url, nil
 }
 
 func getGitRemoteOrigin() []byte {
