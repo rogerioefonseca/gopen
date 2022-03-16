@@ -32,11 +32,18 @@ func openbrowser(url string) {
 	}
 }
 
+func dump(expression ...interface{}) {
+	fmt.Println(fmt.Sprintf("%#v", expression))
+}
+
 func mountRepoUrl(remote string) (string, error) {
 	repo := strings.Split(remote, ":")
-	ssh_host := strings.Split(string(repo[0]), "@")
-	ssh_host = strings.Split(ssh_host[1], " ")
-
+	gitRemoteEndpoint := strings.Split(string(repo[0]), "@")
+	gitRemoteUrl := strings.Split(gitRemoteEndpoint[1], " ")
+	ssh_host := strings.Split(gitRemoteEndpoint[1], " ")
+	dump(gitRemoteEndpoint)
+	dump(gitRemoteUrl)
+	dump(ssh_host)
 	f, err := os.Open(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +59,11 @@ func mountRepoUrl(remote string) (string, error) {
 	hostname, err := cfg.Get(ssh_host[0], "Hostname")
 	if err != nil {
 		log.Fatal(err)
-		return "", errors.New("Could not get the hostname of the ssh_config entry")
+		return "", errors.New("Could not get hostname")
+	}
+
+	if hostname == "" {
+		hostname = gitRemoteUrl[0]
 	}
 
 	return "https://" + hostname + "/" + repo[1], nil
@@ -63,7 +74,7 @@ func main() {
 
 	if err != nil {
 		fmt.Printf("%s\n", errors.New("Not a git repository"))
-		log.Fatal(err)
+		os.Exit(1)
 	}
 
 	if strings.Contains(string(out), "https") {
@@ -72,6 +83,7 @@ func main() {
 	}
 
 	repositoryUrl, err := mountRepoUrl(string(out))
+	fmt.Printf("%s", repositoryUrl)
 
 	if err != nil {
 		log.Fatalf("%s", "Could not retrieve the repositoryUrl correctly")
