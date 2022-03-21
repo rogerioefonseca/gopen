@@ -1,10 +1,15 @@
 # GOPEN
 Go lang TOOL to open the GIT origin remote of a repo in the Browser
 
+## License
+
+This project is released under the [MIT License](LICENSE).
+
+
 ## Installing
 
 You can install Gopen:
-- by downloading the [latest release](https://github.com/rogerioefonseca/gopen)
+- by downloading the [latest release](https://github.com/rogerioefonseca/gopen/releases)
 
 ## How it works
 Sometimes you need to define different keys for different GIT Versioning systems and then you decide to use `ssh_config` to organize yours IdentifyFiles.
@@ -28,6 +33,8 @@ Host gitlab-XYZ
  HostName gitlab.internal.xyz.com
  IdentityFile ~/.ssh/id_rsa_gitlab_internal
 ```
+
+![gopen-gif](https://github.com/rogerioefonseca/gopen/blob/main/assets/gopen.gif)
 
 ## Why I wrote this
 Well, as I do work with different github, gitlab and bitbucket projects configured with `ssh_config`, for me is very usefull, so when I'm pushing a branch to create a MR/PR(and usually I use `lazygit`) and then I want to open the remote to conclude the MR/PR creation process, I do not need anymore to type directly in the browser but instead I can just `gopen`.
