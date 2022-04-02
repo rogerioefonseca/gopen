@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/kevinburke/ssh_config"
+	"github.com/manifoldco/promptui"
 )
 
 func openbrowser(url string) {
@@ -65,8 +66,26 @@ func mountRepoUrl(remote string) (string, error) {
 	return url, nil
 }
 
+func listRemotes() []string {
+	out, err := exec.Command("git", "remote").CombinedOutput()
+
+	if err != nil {
+		fmt.Printf("%s\n", errors.New("Not a git repository"))
+		os.Exit(1)
+	}
+
+	return strings.Split(string(out), "\n")
+}
+
 func getGitRemoteOrigin() []byte {
-	out, err := exec.Command("git", "remote", "get-url", "origin").CombinedOutput()
+	prompt := promptui.Select{
+		Label: "Select git remote",
+		Items: listRemotes(),
+	}
+
+	_, result, _ := prompt.Run()
+
+	out, err := exec.Command("git", "remote", "get-url", result).CombinedOutput()
 
 	if err != nil {
 		fmt.Printf("%s\n", errors.New("Not a git repository"))
