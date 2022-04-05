@@ -34,6 +34,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	osuser "os/user"
 	"path/filepath"
@@ -43,7 +44,7 @@ import (
 	"sync"
 )
 
-const version = "1.2"
+const version = "1.0"
 
 var _ = version
 
@@ -278,7 +279,7 @@ func parseFile(filename string) (*Config, error) {
 }
 
 func parseWithDepth(filename string, depth uint8) (*Config, error) {
-	b, err := os.ReadFile(filename)
+	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -293,16 +294,10 @@ func isSystem(filename string) bool {
 // Decode reads r into a Config, or returns an error if r could not be parsed as
 // an SSH config file.
 func Decode(r io.Reader) (*Config, error) {
-	b, err := io.ReadAll(r)
+	b, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
-	return decodeBytes(b, false, 0)
-}
-
-// DecodeBytes reads b into a Config, or returns an error if r could not be
-// parsed as an SSH config file.
-func DecodeBytes(b []byte) (*Config, error) {
 	return decodeBytes(b, false, 0)
 }
 
@@ -498,10 +493,7 @@ type Host struct {
 	// A Node is either a key/value pair or a comment line.
 	Nodes []Node
 	// EOLComment is the comment (if any) terminating the Host line.
-	EOLComment string
-	// Whitespace if any between the Host declaration and a trailing comment.
-	spaceBeforeComment string
-
+	EOLComment   string
 	hasEquals    bool
 	leadingSpace int // TODO: handle spaces vs tabs here.
 	// The file starts with an implicit "Host *" declaration.
@@ -533,7 +525,7 @@ func (h *Host) Matches(alias string) bool {
 // String prints h as it would appear in a config file. Minor tweaks may be
 // present in the whitespace in the printed file.
 func (h *Host) String() string {
-	var buf strings.Builder
+	var buf bytes.Buffer
 	//lint:ignore S1002 I prefer to write it this way
 	if h.implicit == false {
 		buf.WriteString(strings.Repeat(" ", int(h.leadingSpace)))
@@ -549,9 +541,8 @@ func (h *Host) String() string {
 				buf.WriteString(" ")
 			}
 		}
-		buf.WriteString(h.spaceBeforeComment)
 		if h.EOLComment != "" {
-			buf.WriteByte('#')
+			buf.WriteString(" #")
 			buf.WriteString(h.EOLComment)
 		}
 		buf.WriteByte('\n')
@@ -572,14 +563,12 @@ type Node interface {
 // KV is a line in the config file that contains a key, a value, and possibly
 // a comment.
 type KV struct {
-	Key   string
-	Value string
-	// Whitespace after the value but before any comment
-	spaceAfterValue string
-	Comment         string
-	hasEquals       bool
-	leadingSpace    int // Space before the key. TODO handle spaces vs tabs.
-	position        Position
+	Key          string
+	Value        string
+	Comment      string
+	hasEquals    bool
+	leadingSpace int // Space before the key. TODO handle spaces vs tabs.
+	position     Position
 }
 
 // Pos returns k's Position.
@@ -587,7 +576,8 @@ func (k *KV) Pos() Position {
 	return k.position
 }
 
-// String prints k as it was parsed in the config file.
+// String prints k as it was parsed in the config file. There may be slight
+// changes to the whitespace between values.
 func (k *KV) String() string {
 	if k == nil {
 		return ""
@@ -596,9 +586,9 @@ func (k *KV) String() string {
 	if k.hasEquals {
 		equals = " = "
 	}
-	line := strings.Repeat(" ", int(k.leadingSpace)) + k.Key + equals + k.Value + k.spaceAfterValue
+	line := fmt.Sprintf("%s%s%s%s", strings.Repeat(" ", int(k.leadingSpace)), k.Key, equals, k.Value)
 	if k.Comment != "" {
-		line += "#" + k.Comment
+		line += " #" + k.Comment
 	}
 	return line
 }
