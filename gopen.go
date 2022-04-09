@@ -14,24 +14,11 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func openbrowser(url string) {
-	var err error
+var i int
 
-	switch runtime.GOOS {
-	case "linux":
-		err = exec.Command("xdg-open", url).Start()
-	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-	case "darwin":
-		err = exec.Command("open", url).Start()
-	default:
-		err = fmt.Errorf("unsupported platform")
-	}
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+type (
+	openBrowser func(url string)
+)
 
 func mountRepoUrl(remote string) (string, error) {
 	repo := strings.Split(remote, ":")
@@ -95,10 +82,33 @@ func getGitRemoteOrigin() []byte {
 	return out
 }
 
+func execOpenCommand(open openBrowser, cmdOutput string) {
+	open(cmdOutput)
+}
+
 func main() {
 	cmdOutput := getGitRemoteOrigin()
+	openFunc := func(url string) {
+		var err error
+
+		switch runtime.GOOS {
+		case "linux":
+			err = exec.Command("xdg-open", url).Start()
+		case "windows":
+			err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		case "darwin":
+			err = exec.Command("open", url).Start()
+		default:
+			err = fmt.Errorf("unsupported platform")
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	if strings.Contains(string(cmdOutput), "https") {
-		openbrowser(string(cmdOutput))
+		execOpenCommand(openFunc, string(cmdOutput))
 		os.Exit(0)
 	}
 
@@ -109,5 +119,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	openbrowser(repositoryUrl)
+	execOpenCommand(openFunc, repositoryUrl)
 }
