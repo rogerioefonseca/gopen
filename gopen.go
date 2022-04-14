@@ -67,36 +67,66 @@ func mountRepoUrl(remote string) (string, error) {
 }
 
 func listRemotes() []string {
-	out, err := exec.Command("git", "remote").CombinedOutput()
+	out, err := exec.Command("git", "remote").Output()
 
 	if err != nil {
 		fmt.Printf("%s\n", errors.New("Not a git repository"))
 		os.Exit(1)
 	}
 
-	return strings.Split(string(out), "\n")
+	return strings.Split(strings.TrimSpace(string(out)), "\n")
 }
 
 func getGitRemoteOrigin() []byte {
+	items := listRemotes()
+
+	getRemoteUrl := func(remote string) []byte {
+		out, err := exec.Command("git", "remote", "get-url", remote).CombinedOutput()
+
+		if err != nil {
+			fmt.Printf("%s\n", errors.New("Not a git repository"))
+			os.Exit(1)
+		}
+
+		return out
+	}
+
+	if len(items) == 1 {
+		return getRemoteUrl(items[0])
+	}
+
 	prompt := promptui.Select{
 		Label: "Select git remote",
-		Items: listRemotes(),
+		Items: items,
 	}
 
 	_, result, _ := prompt.Run()
 
-	out, err := exec.Command("git", "remote", "get-url", result).CombinedOutput()
-
-	if err != nil {
-		fmt.Printf("%s\n", errors.New("Not a git repository"))
-		os.Exit(1)
-	}
-
-	return out
+	return getRemoteUrl(result)
 }
 
 func main() {
 	cmdOutput := getGitRemoteOrigin()
+
+	openbrowser := func(url string) {
+		var err error
+
+		switch runtime.GOOS {
+		case "linux":
+			err = exec.Command("xdg-open", url).Start()
+		case "windows":
+			err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		case "darwin":
+			err = exec.Command("open", url).Start()
+		default:
+			err = fmt.Errorf("unsupported platform")
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	if strings.Contains(string(cmdOutput), "https") {
 		openbrowser(string(cmdOutput))
 		os.Exit(0)
