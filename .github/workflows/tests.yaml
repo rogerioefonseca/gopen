@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v3.0.0
+        uses: actions/setup-go@v3.1.0
         with:
           go-version: "1.18"
       - name: Check out code into the Go module directory
@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v3.0.0
+        uses: actions/setup-go@v3.1.0
         with:
           go-version: "1.18"
       - name: Check out code into the Go module directory
