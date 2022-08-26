@@ -11,7 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Verify release notes changes
-        uses: tj-actions/verify-changed-files@v9.2
+        uses: tj-actions/verify-changed-files@v11.1
         id: changed_files
         with:
           files: |
