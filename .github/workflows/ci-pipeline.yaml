@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Verify release notes changes
         uses: tj-actions/verify-changed-files@v11.1
         id: changed_files
@@ -25,7 +25,7 @@ jobs:
     needs: check-release-notes
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build binaries
         run: |
           make artifact
